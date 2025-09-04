@@ -339,7 +339,34 @@ private:
 		      }
 		    }
 		}
+            } else if (value->getStmtClass() == clang::Stmt::UnaryExprOrTypeTraitExprClass) {
+              plog::log(std::cout)
+                << "DEBUG: "
+                << "clang::Stmt::UnaryExprOrTypeTraitExprClass" << std::endl;
 
+              auto *UETT = llvm::dyn_cast<clang::UnaryExprOrTypeTraitExpr>(value);
+              assert (UETT != nullptr);
+              if (UETT && UETT->isValueDependent() == false) {
+                llvm::APSInt value = UETT->EvaluateKnownConstInt(cur_record->getASTContext());
+
+                if (field_name == "frame_size") {
+                  node.frame_size = value.getZExtValue();
+                  plog::log(std::cout)
+                    << "  bit width: " << value.getBitWidth()
+                    << std::endl;
+                  plog::log(std::cout)
+                    << "  literal_value: " << value.getZExtValue()
+                    << std::endl;
+                } else if (field_name == "metameta_size") {
+                  node.metameta_size = value.getZExtValue();
+                  plog::log(std::cout)
+                    << "  bit width: " << value.getBitWidth()
+                    << std::endl;
+                  plog::log(std::cout)
+                    << "  literal_value: " << value.getZExtValue()
+                    << std::endl;
+                }
+              }
 	    } else if (value->getStmtClass() ==
 		       clang::Stmt::IntegerLiteralClass) {
 		plog::log(std::cout)
